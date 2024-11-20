@@ -1,6 +1,7 @@
 import torch
 import pytest
 import os
+import glob
 from model.network import SimpleCNN
 from torchvision import datasets, transforms
 from train import train
@@ -37,7 +38,6 @@ def test_model_accuracy():
     model = SimpleCNN()
     
     # Load the latest model
-    import glob
     model_files = glob.glob('saved_models/model_*.pth')
     assert len(model_files) > 0, "No model files found even after training"
     
