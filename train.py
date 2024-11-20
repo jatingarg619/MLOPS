@@ -24,17 +24,25 @@ def train():
     # Force CPU usage
     torch.backends.cuda.is_built = lambda: False  # Prevent CUDA initialization
     
-    # Load MNIST dataset
-    transform = transforms.Compose([
+    # Load MNIST dataset with augmentation for training
+    train_transform = transforms.Compose([
+        transforms.RandomRotation(15),  # Random rotation up to 15 degrees
+        transforms.RandomAffine(0, scale=(0.9, 1.1)),  # Random scaling between 90% and 110%
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
     
-    train_dataset = datasets.MNIST('data', train=True, download=True, transform=transform)
+    # Test transform without augmentation
+    test_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    
+    train_dataset = datasets.MNIST('data', train=True, download=True, transform=train_transform)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
     
     # Load test dataset for evaluation
-    test_dataset = datasets.MNIST('data', train=False, download=True, transform=transform)
+    test_dataset = datasets.MNIST('data', train=False, download=True, transform=test_transform)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1000)
     
     # Initialize model
