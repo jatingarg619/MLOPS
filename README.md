@@ -1,5 +1,7 @@
 # ML Model CI/CD Pipeline
 
+[![ML Pipeline](https://github.com/jatingarg619/MLOPS/actions/workflows/ml-pipeline.yml/badge.svg)](https://github.com/jatingarg619/MLOPS/actions/workflows/ml-pipeline.yml)
+
 This repository demonstrates a simple CI/CD pipeline for a Machine Learning project using GitHub Actions. The project includes a Convolutional Neural Network (CNN) model trained on the MNIST dataset, with automated testing and model validation.
 
 ## Project Structure
