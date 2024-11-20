@@ -6,13 +6,12 @@ from model.network import SimpleCNN
 from datetime import datetime
 import os
 
-def evaluate(model, device, test_loader):
+def evaluate(model, test_loader):
     model.eval()
     correct = 0
     total = 0
     with torch.no_grad():
         for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
             outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)
             total += target.size(0)
@@ -22,8 +21,8 @@ def evaluate(model, device, test_loader):
     return accuracy
 
 def train():
-    # Set device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Force CPU usage
+    torch.backends.cuda.is_built = lambda: False  # Prevent CUDA initialization
     
     # Load MNIST dataset
     transform = transforms.Compose([
@@ -39,14 +38,13 @@ def train():
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1000)
     
     # Initialize model
-    model = SimpleCNN().to(device)
+    model = SimpleCNN()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     
     # Train for one epoch
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
         loss = criterion(output, target)
@@ -57,7 +55,7 @@ def train():
             print(f'Batch {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}')
     
     # Evaluate accuracy
-    accuracy = evaluate(model, device, test_loader)
+    accuracy = evaluate(model, test_loader)
     print(f'\nTest Accuracy: {accuracy:.2f}%')
     
     # Save model with timestamp and accuracy

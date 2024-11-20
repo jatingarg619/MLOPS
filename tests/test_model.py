@@ -1,7 +1,9 @@
 import torch
 import pytest
+import os
 from model.network import SimpleCNN
 from torchvision import datasets, transforms
+from train import train
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -27,13 +29,18 @@ def test_output_shape():
     assert output.shape[1] == 10, f"Output shape is {output.shape[1]}, should be 10"
 
 def test_model_accuracy():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SimpleCNN().to(device)
+    # First ensure we have a trained model
+    if not os.path.exists('saved_models') or not os.listdir('saved_models'):
+        print("No trained model found. Training a new model...")
+        train()
+    
+    model = SimpleCNN()
     
     # Load the latest model
     import glob
-    import os
     model_files = glob.glob('saved_models/model_*.pth')
+    assert len(model_files) > 0, "No model files found even after training"
+    
     latest_model = max(model_files, key=os.path.getctime)
     model.load_state_dict(torch.load(latest_model))
     
@@ -51,7 +58,6 @@ def test_model_accuracy():
     
     with torch.no_grad():
         for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
             outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)
             total += target.size(0)
